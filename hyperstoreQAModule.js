@@ -33,17 +33,44 @@ function HyperstoreQAModule(domTargetID, hyperstoreApplicationName){
 				Comments
 				Comment Submit
 	*/
-
+	var browserUser = {name:"You, the Viewer", avatarLink: "http://forum.kerbalspaceprogram.com/images/smilies/k_cheesy.gif"};
 	//QA Module
 	var QAModule = React.createClass({displayName:"QAModule",
 		getInitialState: function(){
-			return {data:{topic:{question:"How much wood would a woodchuck chuck?",details:randText()},answers:[]}}
+			return {data:{
+				topic:{question:"How much wood would a woodchuck chuck?",details:randText()},
+				answers:[
+					{
+						member:{name:"Some Mofo #"+Math.ceil(Math.random()*100000), avatarLink: "http://forum.kerbalspaceprogram.com/images/smilies/k_cheesy.gif"},
+						voteInfo:{up:Math.floor(Math.random()*30),down:Math.floor(Math.random()*20)},
+						answerText:randText(),
+						createdAt:new Date()
+					},
+					{
+						member:{name:"Some Mofo #"+Math.ceil(Math.random()*100000), avatarLink: "http://forum.kerbalspaceprogram.com/images/smilies/k_cool.gif"},
+						voteInfo:{up:Math.floor(Math.random()*30),down:Math.floor(Math.random()*20)},
+						answerText:randText(),
+						createdAt:new Date()
+					},
+					{
+						member:{name:"Some Mofo #"+Math.ceil(Math.random()*100000), avatarLink: "http://forum.kerbalspaceprogram.com/images/smilies/k_cry.gif"},
+						voteInfo:{up:Math.floor(Math.random()*30),down:Math.floor(Math.random()*20)},
+						answerText:randText(),
+						createdAt:new Date()
+					},
+					{
+						member:{name:"Some Mofo #"+Math.ceil(Math.random()*100000), avatarLink: undefined},
+						voteInfo:{up:Math.floor(Math.random()*30),down:Math.floor(Math.random()*20)},
+						answerText:randText(),
+						createdAt:new Date()
+					}
+				]}}
 		},
 		render: function(){
 			return (
 					<div className="QAModule panel panel-default">
 						<QATopic data={this.state.data.topic}/>
-						<QASubmitAnswer />
+						<QAAnswerSubmit />
 						<QAAnswerList data={this.state.data.answers} />
 					</div>
 				)
@@ -65,12 +92,14 @@ function HyperstoreQAModule(domTargetID, hyperstoreApplicationName){
 		}
 	})
 
-	//Answer Submit
-	var QASubmitAnswer = React.createClass({displayName:"AnswerSubmit",
+	//QA Answer Submit
+	var QAAnswerSubmit = React.createClass({displayName:"AnswerSubmit",
 		render: function(){
 			return (
 					<div className="AnswerSubmit">
 						<h4>Do You Know?</h4>
+						<MemberInfo data={browserUser}/>
+						<br />
 						<textarea></textarea>
 					</div>
 				)
@@ -78,30 +107,38 @@ function HyperstoreQAModule(domTargetID, hyperstoreApplicationName){
 		}
 	})
 
-	//Answer List
+	//QA Answer List
 	var QAAnswerList = React.createClass({displayName: "AnswerList",
 		render: function(){
+			var answers = this.props.data.map(function(answer){
+				return QAAnswer({member: answer.member, voteInfo: answer.voteInfo, answerText: answer.answerText, answeredAt: answer.createdAt})
+			})
 			return (
 					<div className="AnswerList">
 						<h4>Answers...</h4>
-						<QAAnswer />
-						<QAAnswer />
-						<QAAnswer />
+						<hr />
+						{answers}
 					</div>
 				)
 		}
 	})
-	//Answer
+	//QA Answer
 	var QAAnswer = React.createClass({displayName:"Answer",
 		render: function(){
-			var answerText = randText();
+			console.info(this.props);
+			var answerText = this.props.answerText;
+			var voteInfo = this.props.voteInfo;
+			var answerDate = this.props.answeredAt;
+			var member = this.props.member;
 			return (
 					<div className="Answer">
-						<div  style={{float:'left', "margin-left":'-30px'}}>
-							<VoteWidget />
+						<div  style={{float:'left', "margin-left":'-45px'}}>
+							<VoteWidget data={voteInfo}/>
 						</div>
 						<div>
-							<MemberInfo />
+							<MemberInfo data={member} />
+							<h6 style={{display:"inline-block"}}> - {moment(answerDate).format("ll")}</h6>
+							<br />
 							<p>{answerText}</p>
 						</div>
 						<hr></hr>
@@ -110,14 +147,15 @@ function HyperstoreQAModule(domTargetID, hyperstoreApplicationName){
 
 		}
 	})
+	//Upvote Widget
 	var VoteWidget = React.createClass({displayName:"VoteWidget",
 		render: function(){
-			var netCount = Math.floor(Math.random()*100);
+			var netCount = this.props.data.up - this.props.data.down;
 			return (
-					<div className="VoteWidget">
-						<button>/\</button>
-						<p>{netCount}</p>
-						<button>\/</button>
+					<div className="VoteWidget btn-group-vertical">
+						<button className="btn btn-sm btn-default">+</button>
+						<button className="btn btn-sm btn-default">{netCount}</button>
+						<button className="btn btn-sm btn-default">-</button>
 					</div>
 				)
 		}
@@ -125,10 +163,13 @@ function HyperstoreQAModule(domTargetID, hyperstoreApplicationName){
 	//Member Info
 	var MemberInfo = React.createClass({displayName:"MemberInfo",
 		render: function(){
-			var memberName = "Some Mofo #"+Math.ceil(Math.random()*100000);
+			console.warn(this.props);
+			var memberName = this.props.data.name;
+			var memberAvatar = this.props.data.avatarLink?this.props.data.avatarLink:"";
 			return (
-					<div className="MemberInfo">
-						<h5>{memberName}</h5>
+					<div style={{display:"inline-block", 'padding-left':"5px"}} className="MemberInfo">
+						<img src={memberAvatar} />
+						<h5 style={{display:"inline-block", 'padding-left':"5px"}}>{memberName}</h5>
 					</div>
 				)
 		}
