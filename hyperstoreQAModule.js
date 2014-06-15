@@ -97,10 +97,37 @@ function HyperstoreQAModule(domTargetID, hyperstoreApplicationName){
 			var answerText = randText();
 			return (
 					<div className="Answer">
+						<span>
+							<MemberInfo />
+							<VoteWidget />
+						</span>
 						<p>{answerText}</p>
 					</div>
 				)
 
+		}
+	})
+	var VoteWidget = React.createClass({displayName:"VoteWidget",
+		render: function(){
+			var netCount = Math.floor(Math.random()*100);
+			return (
+					<span className="VoteWidget">
+						<button>/\</button>
+						<p>{netCount}</p>
+						<button>\/</button>
+					</span>
+				)
+		}
+	})
+	//Member Info
+	var MemberInfo = React.createClass({displayName:"MemberInfo",
+		render: function(){
+			var memberName = "Some Mofo #"+Math.ceil(Math.random()*100000);
+			return (
+					<div className="MemberInfo">
+						<h5>{memberName}</h5>
+					</div>
+				)
 		}
 	})
 
