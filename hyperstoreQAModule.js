@@ -97,11 +97,14 @@ function HyperstoreQAModule(domTargetID, hyperstoreApplicationName){
 			var answerText = randText();
 			return (
 					<div className="Answer">
-						<span>
-							<MemberInfo />
+						<div  style={{float:'left', "margin-left":'-30px'}}>
 							<VoteWidget />
-						</span>
-						<p>{answerText}</p>
+						</div>
+						<div>
+							<MemberInfo />
+							<p>{answerText}</p>
+						</div>
+						<hr></hr>
 					</div>
 				)
 
@@ -111,11 +114,11 @@ function HyperstoreQAModule(domTargetID, hyperstoreApplicationName){
 		render: function(){
 			var netCount = Math.floor(Math.random()*100);
 			return (
-					<span className="VoteWidget">
+					<div className="VoteWidget">
 						<button>/\</button>
 						<p>{netCount}</p>
 						<button>\/</button>
-					</span>
+					</div>
 				)
 		}
 	})
