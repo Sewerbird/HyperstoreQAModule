@@ -47,18 +47,6 @@ function HyperstoreQAModule(domTargetID, hyperstoreApplicationName){
 						createdAt:new Date()
 					},
 					{
-						member:{name:"Some Mofo #"+Math.ceil(Math.random()*100000), avatarLink: "http://forum.kerbalspaceprogram.com/images/smilies/k_cool.gif"},
-						voteInfo:{up:Math.floor(Math.random()*30),down:Math.floor(Math.random()*20)},
-						answerText:randText(),
-						createdAt:new Date()
-					},
-					{
-						member:{name:"Some Mofo #"+Math.ceil(Math.random()*100000), avatarLink: "http://forum.kerbalspaceprogram.com/images/smilies/k_cry.gif"},
-						voteInfo:{up:Math.floor(Math.random()*30),down:Math.floor(Math.random()*20)},
-						answerText:randText(),
-						createdAt:new Date()
-					},
-					{
 						member:{name:"Some Mofo #"+Math.ceil(Math.random()*100000), avatarLink: undefined},
 						voteInfo:{up:Math.floor(Math.random()*30),down:Math.floor(Math.random()*20)},
 						answerText:randText(),
@@ -96,12 +84,18 @@ function HyperstoreQAModule(domTargetID, hyperstoreApplicationName){
 	var QAAnswerSubmit = React.createClass({displayName:"AnswerSubmit",
 		render: function(){
 			return (
-					<div className="AnswerSubmit">
-						<h4>Do You Know?</h4>
-						<MemberInfo data={browserUser}/>
-						<br />
-						<textarea></textarea>
+				<div className="well" style={{"padding-left":'5px',"padding-right":'5px',"padding-bottom":'0px',"margin-bottom":'0px',"padding-top":'5px',"margin-left":'5px',"margin-right":'5px'}}>
+					<div className="AnswerSubmit panel panel-default" style={{"margin":'0px',"margin-bottom":'5px'}}>
+						<div className="panel-heading">
+							<h4 className="panel-title">Do You Know?</h4>
+						</div>
+						<div className="panel-body">
+							<MemberInfo data={browserUser} />
+							<br />
+							<textarea style={{width:'100%'}} ></textarea>
+						</div>
 					</div>
+				</div>
 				)
 
 		}
@@ -136,10 +130,18 @@ function HyperstoreQAModule(domTargetID, hyperstoreApplicationName){
 							<VoteWidget data={voteInfo}/>
 						</div>
 						<div>
-							<MemberInfo data={member} />
-							<h6 style={{display:"inline-block"}}> - {moment(answerDate).format("ll")}</h6>
-							<br />
-							<p>{answerText}</p>
+							<div class="row">
+								<div class="col-lg-12 col-12">
+									<MemberInfo data={member} />
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-lg-12 col-12">
+									<h6 style={{display:"inline-block"}}> - {moment(answerDate).format("ll")}</h6>
+									<br />
+									<p>{answerText}</p>
+								</div>
+							</div>
 						</div>
 						<hr></hr>
 					</div>
@@ -154,7 +156,7 @@ function HyperstoreQAModule(domTargetID, hyperstoreApplicationName){
 			return (
 					<div className="VoteWidget btn-group-vertical">
 						<button className="btn btn-sm btn-default">+</button>
-						<button className="btn btn-sm btn-default">{netCount}</button>
+						<button className="btn btn-sm btn-default" value="disabled" disabled>{netCount}</button>
 						<button className="btn btn-sm btn-default">-</button>
 					</div>
 				)
