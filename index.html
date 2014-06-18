@@ -15,22 +15,50 @@
 				</div>
 			</div>	 
 			<div class="row">
-				<div class="col-lg-12 col-12">
+				<div class="col-lg-5 col-5">
 					<div id="content"></div>
 				</div>
 			</div>
+			<!--div class="row">
+				<div class="col-lg-12 col-12">
+					<form id="my-profile">
+					  <input type="text" name="fullName"              value="Mario Izquierdo" />
+
+					  <input type="text" name="address[city]"         value="San Francisco" />
+					  <input type="text" name="address[state][name]"  value="California" />
+					  <input type="text" name="address[state][abbr]"  value="CA" />
+
+					  <input type="text" name="jobbies[]"             value="code" />
+					  <input type="text" name="jobbies[]"             value="climbing" />
+
+					  <textarea              name="projects[0][name]">serializeJSON</textarea>
+					  <textarea              name="projects[0][language]">javascript</textarea>
+					  <input type="hidden"   name="projects[0][popular]" value="0" />
+					  <input type="checkbox" name="projects[0][popular]" value="1"/>
+
+					  <textarea              name="projects[1][name]">tinytest.js</textarea>
+					  <textarea              name="projects[1][language]">javascript</textarea>
+					  <input type="hidden"   name="notembedded" value="0" />
+					  <input type="checkbox" name="notembedded" value="1" checked="checked"/>
+					</form>
+				</div>
+			</div-->
 		</div>
 
-		<script src="http://backwi.re/cdn/hyperstore.latest.js"></script>
+		
+	    <script src="http://underscorejs.org/underscore-min.js"></script>
+	    <script src="http://backwi.re/cdn/hyperstore.latest.js"></script>
 	    <script src="http://fb.me/react-0.10.0.js"></script>
 	    <script src="http://fb.me/JSXTransformer-0.10.0.js"></script>
 	    <script src="http://code.jquery.com/jquery-latest.min.js"></script>
 	    <script src="http://momentjs.com/downloads/moment-with-langs.min.js"></script>
+	    <script src="jquery.serialize.js"></script>
+	    <script src="jquery.deserialize.js"></script>
 	    <script src="readmore.min.js"></script>
 	    <script src="bootstrap.min.js"></script>
 		<script type="text/jsx" src="hyperstoreQAModule.js"></script>
 		<script type="text/jsx">
-			var qaModule = new HyperstoreQAModule("content","reasonable");
+			var qaModule = new HyperstoreQAModule("content","http://reasonable.999geeks.pl/qANDaTopics","http://reasonable.999geeks.pl/qANDaAnswers", "53a140478d7dc0505a000000");
 		</script>
 	</body>
 </html>
