@@ -2,72 +2,36 @@
 * @jsx React.DOM
 */
 //Hyperstore Q&A Module
-
-var arbitext = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aliquam ultrices nulla orci, sed interdum sem molestie vitae. Nullam massa libero, hendrerit malesuada elit eget, pellentesque gravida dui. Sed non ornare odio, eget eleifend tellus. Curabitur rutrum lorem ac convallis lobortis. Maecenas feugiat augue ornare, blandit leo eu, commodo lectus. Mauris vel lectus sit amet orci fermentum tincidunt. Proin interdum fringilla vestibulum. Integer sodales ornare ultricies. Fusce eros mauris, semper a dolor eget, bibendum auctor magna. Nulla rhoncus nisl vitae laoreet luctus. Morbi dolor erat, imperdiet in massa non, sagittis imperdiet leo. Nulla id tristique risus, in tristique sapien. Etiam adipiscing rhoncus tellus, vitae pulvinar eros imperdiet nec. Sed et pretium mi. Praesent a congue ante. Sed nec leo vel lorem pulvinar fringilla non in mi. Duis quis placerat sem, sed aliquam erat. Vivamus condimentum metus at dolor pellentesque tristique. Sed id quam sem. Integer lacinia feugiat lacus, eleifend ultrices erat tincidunt sit amet. Nam non velit eu tortor tincidunt sodales in a odio. Nullam eu sapien sed urna rhoncus suscipit in eget justo. Aliquam eu dolor laoreet metus faucibus accumsan vitae ut ligula. Fusce non est aliquam, sollicitudin mauris nec, sagittis risus. Phasellus purus leo, laoreet eu sapien fermentum, rhoncus ultricies tellus. Vestibulum blandit neque a mauris sagittis, vel tempus quam porttitor. Nunc quis nulla consectetur, tristique nunc in, luctus nibh. Morbi neque mauris, mattis at felis sed, placerat dignissim turpis. Aliquam nec accumsan erat. Duis vehicula pellentesque quam nec consectetur. In sollicitudin nulla at pharetra dictum. Curabitur bibendum, nisi vel gravida commodo, quam velit ornare ante, non volutpat lacus justo et dui. Curabitur ultricies libero nulla, sit amet euismod massa dictum sed. Quisque mattis felis tellus, in lacinia mauris tempus sit amet. Nulla pretium ut lorem ac cursus.";
-var randText = function(){
-			var begin = Math.floor(Math.random() * arbitext.length / 2);
-			var end = Math.floor(Math.random() * arbitext.length / 2 + (arbitext.length / 2));
-			return arbitext.substring(begin, end)
-		}
-function HyperstoreQAModule(domTargetID, topicURL, answerURL, content_id, options){
-	/*
-		QA Module
-			Topic Statement
-				Contributor Info (Asker's)
-					User Name
-				Topic Question
-					editable h3
-				Topic Details
-					Text area with markdown
-				Comments
-
-				Comment Submit
-				Topic Status
-			Answer Submit
-				Contributor Info (User's)
-				Submission Field
-			Answer
-				Contributor Info (Answeror's)
-				Up/downvote Widget
-				Answer Text
-				Comments
-				Comment Submit
-	*/
+function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commentURL, options){
 	var module = this;
 	this.topicStore = new Backwire.Hyperstore(topicURL);
 	this.answerStore = new Backwire.Hyperstore(answerURL);
+	this.commentModule = undefined;
+	options = options?options:{};
+	//Detect HyperstoreCommentModule and use it if no commentModule provided
+	if(!options.commentModule && typeof HyperstoreCommentModule !== 'undefined')
+	{
+		console.info("using hyeprstore comment module");
+		this.commentModule = HyperstoreCommentModule;
+	}
+	//Use specified comment module.
+	else if(options.commentModule)
+	{
+		this.commentModule = options.commentModule;
+	}
+
 	//QA Module
 	var QAModule = React.createClass({displayName:"QAModule",
 		getInitialState: function(){
 			var self = this;
-			/*
-			return {
-				data:{
-					topic:{question:"How much wood would a woodchuck chuck?",details:randText()},
-					answers:[
-						{
-							_id:"123456789012345678901234",
-							member:{username:"Some Mofo #"+Math.ceil(Math.random()*100000), avatarLink: "http://forum.kerbalspaceprogram.com/images/smilies/k_cheesy.gif"},
-							voteInfo:{up:Math.floor(Math.random()*30),down:Math.floor(Math.random()*20)},
-							answerText:randText(),
-							createdAt:new Date()
-						},
-						{
-							_id:"012345678901234567890123",
-							member:{username:"Some Mofo #"+Math.ceil(Math.random()*100000), avatarLink: undefined},
-							voteInfo:{up:Math.floor(Math.random()*30),down:Math.floor(Math.random()*20)},
-							answerText:randText(),
-							createdAt:new Date()
-						}
-					]}}*/
 			module.topicStore.getUser(function(res,err,ver){
 				self.forceUpdate();
 			})
 			module.answerStore.find({topic_id:content_id},function(res,err,ver){
 				if(res && !err)
 				{
-					console.info("Got Answer Store Results: ",res);
 					self.setState(_.extend({},this.state,{answers:res}));
+					$('.expandComment').readmore();
 				}
 				else if(err) console.error(err);
 				else console.warn("Answers for content_id "+content_id+" not found.");
@@ -103,7 +67,7 @@ function HyperstoreQAModule(domTargetID, topicURL, answerURL, content_id, option
 		render: function(){
 			console.info("state render",this.state);
 			//Bad topic retrieval
-			if(_.size(_.keys(this.state.topic)) == 0) return (<div classname="QAModule panel panel-default" style={{"padding":"5px"}}><p>"Bad topic retrieval"</p></div>);
+			if(_.size(_.keys(this.state.topic)) == 0) return (<div classname="QAModule panel panel-default" style={{"padding":"5px", width:"100%"}}><p>"Bad topic retrieval"</p></div>);
 			//No Answers yet!
 			if(_.size(this.state.answers) == 0) return (
 					<div className="QAModule panel panel-default" style={{"padding":"5px"}}>
@@ -124,6 +88,19 @@ function HyperstoreQAModule(domTargetID, topicURL, answerURL, content_id, option
 
 	//Topic Statement
 	var QATopic = React.createClass({displayName:"QATopic",
+		componentDidMount: function(){
+			var self = this;
+			if(module.commentModule)
+			{
+				self.commentTarget = "topicStatementComments";
+				self.commentsURL = commentURL;
+				self.contentID = content_id;
+				if(module.options)
+					self.options = module.options.commentModuleOptions;
+				self.commentBox = new module.commentModule(self.commentTarget, self.commentsURL, self.contentID,self.options);
+			}
+			return {data:[]};
+		},
 		render: function(){
 			return (
 					<div className="QATopic">
@@ -131,6 +108,7 @@ function HyperstoreQAModule(domTargetID, topicURL, answerURL, content_id, option
 						<MemberInfo data={this.props.data.asker} />
 						<h6 style={{'padding-left':'5px', display:"inline-block"}}> - {moment(this.props.createdAt).format("ll")}</h6>
 						<p>{this.props.data.details}</p>
+						<div id="topicStatementComments" />
 					</div>
 				)
 		}
@@ -199,7 +177,20 @@ function HyperstoreQAModule(domTargetID, topicURL, answerURL, content_id, option
 		}
 	})
 	//QA Answer
-	var QAAnswer = React.createClass({displayName:"Answer",
+	var QAAnswer = React.createClass({displayName:"Answer",		
+		componentDidMount: function(){
+			var self = this;
+			if(module.commentModule)
+			{
+				self.commentTarget = this.props.data._id+"_commentBox";
+				self.commentsURL = commentURL;
+				self.contentID = this.props.data._id;
+				if(module.options)
+					self.options = module.options.commentModuleOptions;
+				self.commentBox = new module.commentModule(self.commentTarget, self.commentsURL, self.contentID,self.options);
+			}
+			return {data:[]};
+		},
 		render: function(){
 			console.info(this.props);
 			var answerID = this.props.data._id;
@@ -222,7 +213,12 @@ function HyperstoreQAModule(domTargetID, topicURL, answerURL, content_id, option
 							</div>
 							<div class="row">
 								<div class="col-lg-12 col-12">
-									<p style={{'margin-left':'5px'}}>{answerText}</p>
+									<p className="expandComment" style={{'margin-left':'5px'}}>{answerText}</p>
+								</div>
+							</div>
+							<div class="row">
+								<div class="col-lg-12 col-12">
+									<div id={this.props.data._id+"_commentBox"} />
 								</div>
 							</div>
 						</div>
