@@ -2,12 +2,13 @@
 * @jsx React.DOM
 */
 //Hyperstore Q&A Module
-function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commentURL, options){
+function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commentURL, options, voteCallback){
 	var module = this;
 	this.topicStore = new Backwire.Hyperstore(topicURL);
 	this.answerStore = new Backwire.Hyperstore(answerURL);
 	this.commentModule = undefined;
-	options = options?options:{};
+	this.options = options?options:{};
+	this.voteCallback = voteCallback;
 	//Detect HyperstoreCommentModule and use it if no commentModule provided
 	if(!options.commentModule && typeof HyperstoreCommentModule !== 'undefined')
 	{
@@ -47,6 +48,8 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 			return {data:{}};
 		},
 		handleVote : function(sign, answer){
+			if(module.voteCallback) module.voteCallback(content_id,answer,sign,module.topicStore.user);
+			/*
 			var action = sign>0?{'voteInfo.up':1}:{'voteInfo.down':1};
 			module.answerStore.update({_id:answer},{$inc:action}, function(res,err,ver){
 				if(!err)
@@ -54,6 +57,7 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 					console.log("Successfully voted");
 				} else console.error("Error voting: ", err);
 			})
+			*/
 		},
 		handleAnswerSubmit : function(answer){
 			module.answerStore.insert(answer,function(res,err,ver){
@@ -65,11 +69,12 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 			})
 		},
 		render: function(){
-			console.info("state render",this.state);
 			//Bad topic retrieval
-			if(_.size(_.keys(this.state.topic)) == 0) return (<div classname="QAModule panel panel-default" style={{"padding":"5px", width:"100%"}}><p>"Bad topic retrieval"</p></div>);
+			if(_.size(_.keys(this.state.topic)) == 0) 
+				return (<div classname="QAModule panel panel-default" style={{"padding":"5px", width:"100%"}}><p>"Bad topic retrieval"</p></div>);
 			//No Answers yet!
-			if(_.size(this.state.answers) == 0) return (
+			if(_.size(this.state.answers) == 0) 
+				return (
 					<div className="QAModule panel panel-default" style={{"padding":"5px"}}>
 						<QATopic data={this.state.topic} />
 						<QAAnswerSubmit onAnswerSubmit={this.handleAnswerSubmit} headerText={"No Answers Submitted: Be the First!"}/>
@@ -216,7 +221,7 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 									<p className="expandComment" style={{'margin-left':'5px'}}>{answerText}</p>
 								</div>
 							</div>
-							<div class="row">
+							<div class="row" id={this.props.data._id+"_commentBoxRow"}>
 								<div class="col-lg-12 col-12">
 									<div id={this.props.data._id+"_commentBox"} />
 								</div>

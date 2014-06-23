@@ -4,7 +4,7 @@
 
 function HyperstoreCommentModule(domTargetID, hyperstoreURL, content_id, options){
 	var module = this;
-	options = options?options:{};
+	options = options?options:{hideCommentsWhenEmptyAndSignedOut: true};
 	this.store = new Backwire.Hyperstore(hyperstoreURL);
 	this.defaultAvatar = options.defaultUserAvatar?options.defaultUserAvatar:"http://www.gravatar.com/avatar/00000000000000000000000000000000?d=mm";
 	this.stringToColour = function(str) { 
@@ -47,9 +47,11 @@ function HyperstoreCommentModule(domTargetID, hyperstoreURL, content_id, options
 			var heading = React.DOM.div( {className:"panel-heading"}, 
 						React.DOM.h3(null, "Comments")
 					);
-			if(options.hideHeader || true) heading = React.DOM.div();
+			if(options.hideCommentsHeader) heading = React.DOM.div();
+			var hide = {}
+			if(options.hideCommentsWhenEmptyAndSignedOut && !module.store.user) hide = {display:"none"}
 			return (
-				React.DOM.div( {className:"commentBox panel panel-default"}, 
+				React.DOM.div( {className:"commentBox panel panel-default", style:hide}, 
 					heading
 					,
 					React.DOM.div( {className:"panel-body"}, 
