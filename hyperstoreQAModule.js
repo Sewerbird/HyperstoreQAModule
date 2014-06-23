@@ -134,10 +134,6 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 						avatarLink: module.topicStore.user.avatarLink
 					},
 					createdAt: new Date(),
-					voteInfo:{
-						up:0,
-						down:0
-					}
 				};
 				//TODO: Do a real look at how voting should be handled properly... this is ripe for abuse/multi-voting
 				console.info("submitting",answer);
