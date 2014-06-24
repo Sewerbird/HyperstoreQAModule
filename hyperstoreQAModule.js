@@ -6,6 +6,7 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 	var module = this;
 	this.topicStore = new Backwire.Hyperstore(topicURL);
 	this.answerStore = new Backwire.Hyperstore(answerURL);
+	this.defaultAvatar = options.defaultUserAvatar?options.defaultUserAvatar:"http://www.gravatar.com/avatar/00000000000000000000000000000000?d=mm";
 	this.commentModule = undefined;
 	this.options = options?options:{};
 	this.voteCallback = voteCallback;
@@ -131,7 +132,7 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 					member: {
 						_id: module.topicStore.user._id,
 						username: module.topicStore.user.username,
-						avatarLink: module.topicStore.user.avatarLink
+						avatarLink: module.topicStore.user.profile.avatarLink
 					},
 					createdAt: new Date(),
 				};
@@ -254,10 +255,10 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 	var MemberInfo = React.createClass({displayName:"MemberInfo",
 		render: function(){
 			var memberName = this.props.data.username?this.props.data.username:"Anonymous";
-			var memberAvatar = this.props.data.avatarLink?this.props.data.avatarLink:"";
+			var memberAvatar = this.props.data.avatarLink?this.props.data.avatarLink:module.defaultAvatar;
 			return (
 					<div style={{display:"inline-block", 'padding-left':"5px"}} className="MemberInfo">
-						<img src={memberAvatar} />
+						<img src={memberAvatar} className="img-circle" style={{'max-width':"50px"}}/>
 						<h5 style={{display:"inline-block", 'padding-left':"5px"}}>{memberName}</h5>
 					</div>
 				)
