@@ -266,7 +266,7 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 					member: {
 						_id: module.topicStore.user._id,
 						username: module.topicStore.user.username,
-						avatarLink: module.topicStore.user.profile.avatarLink
+						avatarLink: module.topicStore.user.profile?module.topicStore.user.profile.avatarLink:undefined
 					},
 					createdAt: new Date(),
 				};
