@@ -12,6 +12,7 @@
 			<div class="row">
 				<div class="col-12">
 					<h1><a href="#">Exkuku</a></h1>	
+					<div id="standalone"></div>
 				</div>
 			</div>	 
 			<div class="row">
@@ -59,7 +60,14 @@
 	    <script type="text/jsx" src="commentBoxModule.js"></script>
 		<script type="text/jsx" src="hyperstoreQAModule.js"></script>
 		<script type="text/jsx">
-			var qaModule = new HyperstoreQAModule("content","53a140478d7dc0505a000000","http://reasonable.999geeks.pl/qANDaTopics","http://reasonable.999geeks.pl/qANDaAnswers", "http://reasonable.999geeks.pl/comments",{commentModuleOptions:{hideCommentsHeader:true, hideCommentsWhenEmptyAndSignedOut: true}},function(a,b,c,d){console.log(a,b,c,d)});
+			var qaModule = new HyperstoreQAModule(
+				"content",
+				"53aa76455f5ebe05e1000000",
+				"http://reasonable.999geeks.pl/qANDaTopics",
+				"http://reasonable.999geeks.pl/qANDaAnswers", 
+				"http://reasonable.999geeks.pl/comments",
+				{commentModuleOptions:{hideCommentsHeader:true, hideCommentsWhenEmptyAndSignedOut: true}},
+				function(a,b,c,d){console.log(a,b,c,d)});
 		</script>
 	</body>
 </html>

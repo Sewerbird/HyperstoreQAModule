@@ -1,19 +1,127 @@
 /**
 * @jsx React.DOM
 */
-//Hyperstore Q&A Module
-function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commentURL, options, voteCallback){
+function HyperstoreStandaloneQAAskButton(domTargetID, topicURL, options){
 	var module = this;
-	this.topicStore = new Backwire.Hyperstore(topicURL);
-	this.answerStore = new Backwire.Hyperstore(answerURL);
+	console.log(domTargetID + " to ",options);
+	module.topicStore = options && options.useStore?options.useStore:new Backwire.Hyperstore(topicURL);
+	module.submitCallback = !options || options.submitCallback === undefined?function(){}:options.submitCallback;
+	//QA Ask Button
+	var QAAskButton = React.createClass({displayName: "AskButton",
+		handleClick : function(){
+			this.refs.askTopic.show();
+		},
+		render: function(){
+			return (
+				<div>
+					<button className="AskButton btn btn-default btn-success pull-right" style={{display:"inline-block"}} onClick={this.handleClick}>
+						Ask A Question!
+					</button>
+					<QAAskSubmit ref="askTopic" />
+				</div>
+				)
+		}
+	})
+	var QAAskSubmit = React.createClass({displayName:"AskSubmit",
+		getInitialState: function() {
+			var self = this;
+			module.topicStore.getUser(function(res,err,ver){
+				self.forceUpdate();
+			})
+			return {
+				className: 'modal fade'
+			};
+		},
+		show: function() {
+			this.setState({ className: 'modal fade show' });
+			setTimeout(function() {
+				this.setState({ className: 'modal fade show in' });
+			}.bind(this), 0);
+		},
+		hide: function() {
+			// Fade out the help dialog, and totally hide it after a set timeout
+			// (once the fade completes)
+			this.setState({ className: 'modal fade show' });
+			setTimeout(function() {
+				this.setState({ className: 'modal fade' });
+			}.bind(this), 400);
+		},
+		ask: function(event){
+			event.preventDefault();
+			var self = this;
+			if(module.topicStore.user)
+			{
+				var question = {
+					answers: [],
+					createdAt: new Date(),
+					question: this.refs.askQuestion.getDOMNode().value,
+					details: this.refs.askDetails.getDOMNode().value,
+					asker: {
+						_id: module.topicStore.user._id,
+						username: module.topicStore.user.username,
+						avatarLink: module.topicStore.user.profile.avatarLink
+					}
+				}
+				module.topicStore.insert(question,function(res,err,ver){
+					if(err)
+						throw err
+					else if(res)
+					{
+						console.info(res);
+						console.info(module.submitCallback);
+						self.hide();
+						self.refs.askQuestion.getDOMNode().value = "";
+						self.refs.askDetails.getDOMNode().value = "";
+						module.submitCallback(res[0]._id);
+					}
+				})
+			}
+		},
+		render: function() {
+		  return (
+		    <div className={this.state.className} ref='askTopic'>
+		      <div className="modal-dialog">
+		        <form id="askForm" className="modal-content" onSubmit={this.ask}>
+		          <div className="modal-header">
+		            <h4 className="modal-title">Ask Your Question!</h4>
+		          </div>
+		          <div className="modal-body">
+		          	<input ref="askQuestion" type="text" form="askForm" style={{'max-width':'100% !important', width:'100% !important'}} />
+		            <textarea ref="askDetails" form="askForm" style={{'max-width':'100% !important', width:'100% !important'}} />
+		          </div>
+		          <div className="modal-footer">
+		            <button type="button" className="btn btn-default btn-warning" onClick={this.hide}>Close</button>
+		            <input type="submit" className="btn btn-default btn-success" />
+		          </div>
+		        </form>
+		      </div>
+		    </div>
+		  );
+		}
+	});	
+	React.renderComponent(
+		<QAAskButton />,
+		document.getElementById(domTargetID)
+	);	
+}
+//Hyperstore Q&A Module
+function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commentURL, options, voteCallback, askCallback){
+	var module = this;
+	this.topicStore = new Backwire.Hyperstore(topicURL,{silent:true});
+	this.answerStore = new Backwire.Hyperstore(answerURL,{silent:true});
 	this.defaultAvatar = options.defaultUserAvatar?options.defaultUserAvatar:"http://www.gravatar.com/avatar/00000000000000000000000000000000?d=mm";
 	this.commentModule = undefined;
 	this.options = options?options:{};
 	this.voteCallback = voteCallback;
+	this.askCallback = function(newID){module.changeContentID(newID)};
+	console.warn("fooooo",this.askCallback);
+
+	this.changeContentID = function(newID){
+		this.refs.myModule.changeTarget(newID);
+	}
 	//Detect HyperstoreCommentModule and use it if no commentModule provided
 	if(!options.commentModule && typeof HyperstoreCommentModule !== 'undefined')
 	{
-		console.info("using hyeprstore comment module");
 		this.commentModule = HyperstoreCommentModule;
 	}
 	//Use specified comment module.
@@ -24,6 +132,31 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 
 	//QA Module
 	var QAModule = React.createClass({displayName:"QAModule",
+		changeTarget: function(newID){
+			console.warn("made it");
+			var self = this;
+			content_id = newID;
+			module.answerStore.resetReactivity();
+			module.topicStore.resetReactivity();
+			module.answerStore.find({topic_id:content_id},function(res,err,ver){
+				if(res && !err)
+				{
+					self.setState(_.extend({},this.state,{answers:res}));
+					$('.expandComment').readmore();
+				}
+				else if(err) console.error(err);
+				else console.warn("Answers for content_id "+content_id+" not found.");
+			})
+			module.topicStore.findOne({_id:content_id},function(res,err,ver){
+				if(res && !err)
+				{
+					self.setState(_.extend({},this.state,{topic:res}));
+				}
+				else if(err) console.error(err);
+				else console.warn("Content for content_id "+content_id+" not found.");
+			})
+			React.unmountComponentAtNode(document.getElementById('topicView'));
+		},
 		getInitialState: function(){
 			var self = this;
 			module.topicStore.getUser(function(res,err,ver){
@@ -77,7 +210,7 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 			if(_.size(this.state.answers) == 0) 
 				return (
 					<div className="QAModule panel panel-default" style={{"padding":"5px"}}>
-						<QATopic data={this.state.topic} />
+						<QATopic data={this.state.topic} changeCallback={this.changeTarget} />
 						<QAAnswerSubmit onAnswerSubmit={this.handleAnswerSubmit} headerText={"No Answers Submitted: Be the First!"}/>
 					</div>
 				)
@@ -94,8 +227,9 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 
 	//Topic Statement
 	var QATopic = React.createClass({displayName:"QATopic",
-		componentDidMount: function(){
+		componentDidUpdate: function(){
 			var self = this;
+			module.askButton = new HyperstoreStandaloneQAAskButton("askButton",null,{useStore:module.topicStore, submitCallback:this.props.changeCallback});
 			if(module.commentModule)
 			{
 				self.commentTarget = "topicStatementComments";
@@ -109,8 +243,9 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 		},
 		render: function(){
 			return (
-					<div className="QATopic">
+					<div className="QATopic" id="topicView">
 						<h3>{this.props.data.question}</h3>
+						<span id="askButton" />
 						<MemberInfo data={this.props.data.asker} />
 						<h6 style={{'padding-left':'5px', display:"inline-block"}}> - {moment(this.props.createdAt).format("ll")}</h6>
 						<p>{this.props.data.details}</p>
@@ -119,7 +254,6 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 				)
 		}
 	})
-
 	//QA Answer Submit
 	var QAAnswerSubmit = React.createClass({displayName:"AnswerSubmit",
 		handleSubmit : function(event){
@@ -194,7 +328,6 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 			return {data:[]};
 		},
 		render: function(){
-			console.info(this.props);
 			var answerID = this.props.data._id;
 			var answerText = this.props.data.answerText;
 			var voteInfo = this.props.data.voteInfo?_.extend(this.props.data.voteInfo,{answerID:this.props.data._id}):{up:0,down:0};
