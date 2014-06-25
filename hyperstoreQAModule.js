@@ -59,7 +59,7 @@ function HyperstoreStandaloneQAAskButton(domTargetID, topicURL, options){
 					asker: {
 						_id: module.topicStore.user._id,
 						username: module.topicStore.user.username,
-						avatarLink: module.topicStore.user.profile.avatarLink
+						avatarLink: module.topicStore.user.profile?module.topicStore.user.profile.avatarLink:undefined
 					}
 				}
 				module.topicStore.insert(question,function(res,err,ver){
