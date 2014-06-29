@@ -3,7 +3,6 @@
 */
 function HyperstoreStandaloneQAAskButton(domTargetID, topicURL, options){
 	var module = this;
-	console.log(domTargetID + " to ",options);
 	module.topicStore = options && options.useStore?options.useStore:new Backwire.Hyperstore(topicURL);
 	module.submitCallback = !options || options.submitCallback === undefined?function(){}:options.submitCallback;
 	//QA Ask Button
@@ -197,7 +196,6 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 			module.answerStore.insert(answer,function(res,err,ver){
 				if(res && !err)
 				{
-					console.log("Successfully posted ",res[0])
 					module.topicStore.update({_id:content_id},{$push:{answers: res[0]._id}})
 				} else console.error("Error posting answer: ", err);
 			})
