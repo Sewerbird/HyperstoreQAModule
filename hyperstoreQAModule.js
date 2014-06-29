@@ -138,7 +138,7 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 			content_id = newID;
 			module.answerStore.resetReactivity();
 			module.topicStore.resetReactivity();
-			module.answerStore.find({topic_id:content_id},function(res,err,ver){
+			module.answerStore.find({topic_id:content_id},{sort:{'voteInfo.net':1}},function(res,err,ver){
 				if(res && !err)
 				{
 					self.setState(_.extend({},this.state,{answers:res}));
@@ -162,7 +162,7 @@ function HyperstoreQAModule(domTargetID, content_id, topicURL, answerURL, commen
 			module.topicStore.getUser(function(res,err,ver){
 				self.forceUpdate();
 			})
-			module.answerStore.find({topic_id:content_id},function(res,err,ver){
+			module.answerStore.find({topic_id:content_id},{sort:{'voteInfo.net':1}},function(res,err,ver){
 				if(res && !err)
 				{
 					self.setState(_.extend({},this.state,{answers:res}));

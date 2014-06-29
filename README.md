@@ -48,4 +48,4 @@ HyperstoreQAModule takes several parameters:
 
 ####Implementing voteCallback####
 
-However your server verifies up/downvotes, it needs to successfully create/update the `voteInfo` field of the specified answer in your answers collection. HyperstoreQAModule reads the `voteInfo.up` and `voteInfo.down` fields to calculate the net upvotedness of an answer.
+However your server verifies up/downvotes, it needs to successfully create/update the `voteInfo` field of the specified answer in your answers collection. HyperstoreQAModule reads the `voteInfo.up` and `voteInfo.down` fields to calculate the net upvotedness of an answer, and uses `voteInfo.net` to sort answers based on goodness: `voteInfo.net` should be `voteInfo.up` minus `voteInfo.down`.
